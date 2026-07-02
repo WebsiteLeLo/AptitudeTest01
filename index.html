@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aptitude Mastery — Mock Test Portal</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+  :root{
+    --blue-dark:#0B3D6B;
+    --blue-mid:#134E8C;
+    --blue-header:#0E4A80;
+    --panel-line:#D6DEE7;
+    --bg:#EEF2F6;
+    --white:#FFFFFF;
+    --text:#1B2733;
+    --text-soft:#5B6B7D;
+    --green:#3EA24B;
+    --green-dark:#2E8038;
+    --red:#D64545;
+    --purple:#7A3CB5;
+    --gray:#9AA6B2;
+    --gray-light:#DCE2E8;
+    --orange:#E08A1E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;
+    color:var(--text);
+  }
+
+  /* ---------- TOP BAR ---------- */
+  .topbar{
+    background:linear-gradient(180deg, var(--blue-header), var(--blue-dark));
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 22px;
+    box-shadow:0 2px 6px rgba(0,0,0,0.18);
+    position:sticky;
+    top:0;
+    z-index:100;
+  }
+  .examTitle{
+    font-size:16px;
+    font-weight:600;
+    letter-spacing:0.02em;
+  }
+  .examTitle small{
+    display:block;
+    font-weight:400;
+    font-size:11.5px;
+    color:#BFD4E8;
+    letter-spacing:0.04em;
+  }
+  .timerBox{
+    background:rgba(255,255,255,0.1);
+    border:1px solid rgba(255,255,255,0.35);
+    padding:7px 16px;
+    border-radius:4px;
+    font-size:14px;
+    font-family:'Courier New',monospace;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .timerBox #timerDisplay{
+    font-size:17px;
+    font-weight:700;
+    letter-spacing:0.05em;
+  }
+  .timerBox.warn{background:rgba(214,69,69,0.25); border-color:#ff9a9a;}
+  .timerBox.warn #timerDisplay{color:#ffb3b3;}
+
+  /* ---------- INSTRUCTIONS ---------- */
+  .instructionsScreen{
+    max-width:760px;
+    margin:36px auto;
+    background:#fff;
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:30px 34px;
+    box-shadow:0 1px 4px rgba(0,0,0,0.06);
+  }
+  .instructionsScreen h2{
+    margin-top:0;
+    color:var(--blue-dark);
+    border-bottom:2px solid var(--panel-line);
+    padding-bottom:12px;
+  }
+  .instructionsScreen ul{line-height:2;font-size:14.5px;color:var(--text-soft);}
+  .instructionsScreen li b{color:var(--text);}
+  .beginBtn{
+    display:block;
+    width:100%;
+    margin-top:22px;
+    background:var(--green-dark);
+    color:#fff;
+    border:none;
+    padding:14px;
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:0.03em;
+    border-radius:4px;
+    cursor:pointer;
+  }
+  .beginBtn:hover{background:#256b2c;}
+
+  /* ---------- EXAM BODY ---------- */
+  .examBody{
+    display:flex;
+    max-width:1200px;
+    margin:16px auto;
+    gap:16px;
+    padding:0 16px;
+    align-items:flex-start;
+  }
+
+  .questionPanel{
+    flex:1;
+    background:#fff;
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    overflow:hidden;
+    min-height:520px;
+    display:flex;
+    flex-direction:column;
+  }
+  .qpHeader{
+    background:#F4F7FA;
+    border-bottom:1px solid var(--panel-line);
+    padding:12px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:14px;
+    font-weight:600;
+    color:var(--blue-dark);
+  }
+  .qType{
+    background:var(--blue-mid);
+    color:#fff;
+    font-size:11px;
+    padding:3px 10px;
+    border-radius:3px;
+    font-weight:600;
+    letter-spacing:0.05em;
+  }
+  .qpContent{padding:22px 24px; flex:1;}
+  .qCategory{
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--text-soft);
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  .qText{
+    font-size:17px;
+    line-height:1.7;
+    margin-bottom:22px;
+    color:var(--text);
+  }
+  .qOptions{display:flex; flex-direction:column; gap:12px;}
+  .optionRow{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    border:1px solid var(--panel-line);
+    padding:12px 16px;
+    border-radius:4px;
+    cursor:pointer;
+    transition:background .12s, border-color .12s;
+  }
+  .optionRow:hover{background:#F5F9FC;}
+  .optionRow.selected{
+    border-color:var(--blue-mid);
+    background:#EAF2FA;
+  }
+  .optionRow input[type=radio]{
+    margin-top:3px;
+    accent-color:var(--blue-mid);
+    width:16px;height:16px;
+    flex:0 0 auto;
+  }
+  .optLabel{
+    font-weight:700;
+    color:var(--blue-mid);
+    margin-right:4px;
+  }
+  .optText{font-size:15px;line-height:1.5;}
+
+  .qpFooter{
+    border-top:1px solid var(--panel-line);
+    padding:14px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#FAFBFC;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .qpFooter button{
+    border:none;
+    padding:10px 16px;
+    font-size:13px;
+    font-weight:600;
+    border-radius:4px;
+    cursor:pointer;
+    letter-spacing:0.01em;
+  }
+  #markReviewBtn{background:var(--purple); color:#fff;}
+  #markReviewBtn:hover{background:#622f92;}
+  #clearBtn{background:#fff; color:var(--text-soft); border:1px solid var(--gray-light) !important;}
+  #clearBtn:hover{background:#F0F2F4;}
+  .navRight{display:flex; gap:10px;}
+  #prevBtn{background:#fff; color:var(--blue-mid); border:1px solid var(--blue-mid) !important;}
+  #prevBtn:hover{background:#EAF2FA;}
+  #prevBtn:disabled{opacity:0.35; cursor:not-allowed;}
+  #saveNextBtn{background:var(--green-dark); color:#fff;}
+  #saveNextBtn:hover{background:#256b2c;}
+
+  /* ---------- PALETTE PANEL ---------- */
+  .palettePanel{
+    width:290px;
+    flex:0 0 auto;
+    background:#fff;
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:16px;
+  }
+  .candidateBox{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-bottom:1px solid var(--panel-line);
+    padding-bottom:14px;
+    margin-bottom:14px;
+  }
+  .avatar{
+    width:42px;height:42px;
+    border-radius:50%;
+    background:var(--blue-mid);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+    font-size:16px;
+  }
+  .candidateBox .cname{font-weight:600;font-size:13.5px;}
+  .candidateBox .cid{font-size:11px;color:var(--text-soft);}
+
+  .legend{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin-bottom:16px;
+    font-size:11px;
+  }
+  .legend .li{display:flex; align-items:center; gap:6px;}
+  .legend .sw{
+    width:16px;height:16px;
+    border-radius:3px;
+    flex:0 0 auto;
+    display:inline-block;
+  }
+  .sw.answered{background:var(--green);}
+  .sw.notanswered{background:var(--red);}
+  .sw.notvisited{background:#fff; border:1px solid var(--gray);}
+  .sw.marked{background:var(--purple);}
+  .sw.markedans{background:var(--purple); position:relative;}
+  .sw.markedans::after{
+    content:"";
+    position:absolute; bottom:-2px; right:-2px;
+    width:7px;height:7px; border-radius:50%;
+    background:var(--green); border:1px solid #fff;
+  }
+
+  .paletteLabel{
+    font-size:12px;
+    font-weight:700;
+    color:var(--text-soft);
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    margin-bottom:8px;
+  }
+  .paletteGrid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .paletteBtn{
+    width:100%;
+    aspect-ratio:1;
+    border:none;
+    border-radius:4px;
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    color:#fff;
+    background:#fff;
+    color:var(--text);
+    border:1px solid var(--gray);
+    position:relative;
+  }
+  .paletteBtn.answered{background:var(--green); color:#fff; border:none;}
+  .paletteBtn.notanswered{background:var(--red); color:#fff; border:none;}
+  .paletteBtn.marked{background:var(--purple); color:#fff; border:none;}
+  .paletteBtn.markedans{background:var(--purple); color:#fff; border:none;}
+  .paletteBtn.markedans::after{
+    content:"";
+    position:absolute; bottom:2px; right:2px;
+    width:7px;height:7px; border-radius:50%;
+    background:var(--green); border:1px solid #fff;
+  }
+  .paletteBtn.current{outline:3px solid var(--orange); outline-offset:1px;}
+
+  #submitTestBtn{
+    width:100%;
+    background:var(--blue-dark);
+    color:#fff;
+    border:none;
+    padding:13px;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    border-radius:4px;
+    cursor:pointer;
+  }
+  #submitTestBtn:hover{background:#092c4d;}
+
+  /* ---------- MODAL ---------- */
+  .modalOverlay{
+    position:fixed; inset:0;
+    background:rgba(10,20,35,0.55);
+    display:flex; align-items:center; justify-content:center;
+    z-index:500;
+  }
+  .modalBox{
+    background:#fff;
+    border-radius:6px;
+    width:420px;
+    max-width:90vw;
+    padding:26px 28px;
+  }
+  .modalBox h3{margin-top:0; color:var(--blue-dark);}
+  .modalStats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin:18px 0;
+    font-size:13.5px;
+  }
+  .modalStats .m-item{
+    display:flex; justify-content:space-between;
+    border:1px solid var(--panel-line);
+    padding:8px 12px;
+    border-radius:4px;
+  }
+  .modalBtns{display:flex; gap:10px; justify-content:flex-end; margin-top:10px;}
+  .modalBtns button{
+    border:none; padding:10px 18px; border-radius:4px;
+    font-size:13.5px; font-weight:600; cursor:pointer;
+  }
+  #cancelSubmit{background:#fff; border:1px solid var(--gray-light) !important; color:var(--text-soft);}
+  #confirmSubmit{background:var(--red); color:#fff;}
+
+  /* ---------- RESULTS ---------- */
+  .resultsScreen{
+    max-width:900px;
+    margin:24px auto;
+    padding:0 16px;
+  }
+  .scoreSummary{
+    background:linear-gradient(180deg, var(--blue-header), var(--blue-dark));
+    color:#fff;
+    border-radius:6px;
+    padding:32px;
+    text-align:center;
+    margin-bottom:20px;
+  }
+  .scoreSummary .bigscore{
+    font-size:52px;
+    font-weight:800;
+    font-family:'Courier New',monospace;
+    color:#FFD166;
+  }
+  .scoreSummary .sub{color:#BFD4E8; font-size:13px; margin-top:4px;}
+  .statRow{
+    display:flex; justify-content:center; gap:30px;
+    margin-top:22px; flex-wrap:wrap;
+  }
+  .statRow .stat{font-family:'Courier New',monospace; font-size:13px;}
+  .statRow .stat .num{display:block; font-size:26px; font-weight:800;}
+  .statRow .correct .num{color:#8FE39A;}
+  .statRow .wrong .num{color:#F3A0A0;}
+  .statRow .skip .num{color:#C9D8E8;}
+  .retakeBtn2{
+    margin-top:24px;
+    background:transparent;
+    border:1px solid #FFD166;
+    color:#FFD166;
+    padding:10px 24px;
+    border-radius:4px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .retakeBtn2:hover{background:#FFD166; color:var(--blue-dark);}
+
+  .reviewCard{
+    background:#fff;
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:20px 22px;
+    margin-bottom:14px;
+  }
+  .reviewHead{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:10px;
+  }
+  .reviewHead .rq{font-weight:700; color:var(--blue-dark); font-size:14px;}
+  .verdictTag{
+    font-size:11px; font-weight:700; padding:3px 10px; border-radius:3px; color:#fff;
+  }
+  .verdictTag.correct{background:var(--green-dark);}
+  .verdictTag.wrong{background:var(--red);}
+  .verdictTag.skip{background:var(--gray);}
+  .reviewQText{font-size:15.5px; margin-bottom:12px; line-height:1.6;}
+  .reviewOpt{
+    padding:9px 12px; border-radius:4px; font-size:14px; margin-bottom:7px;
+    border:1px solid var(--panel-line);
+  }
+  .reviewOpt.correctopt{border-color:var(--green); background:#EAF6EB;}
+  .reviewOpt.wrongopt{border-color:var(--red); background:#FBEAEA;}
+  .reviewExp{
+    margin-top:10px; padding:12px 14px; background:#F4F7FA;
+    border-left:3px solid var(--blue-mid); font-size:13.5px; line-height:1.6; color:var(--text-soft);
+  }
+
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="examTitle">Aptitude Mastery Portfolio — Mock Test
+    <small>Version 2 · Revised · 25 Questions · Quant &amp; Reasoning</small>
+  </div>
+  <div class="timerBox" id="timerBox">Time Left: <span id="timerDisplay">01:30:00</span></div>
+</div>
+
+<div class="instructionsScreen" id="instructionsScreen">
+  <h2>General Instructions</h2>
+  <ul>
+    <li>The test contains <b>25 questions</b>. The clock will be set at the server and a countdown timer at the top right corner will display the <b>remaining time of 1 hour 30 minutes</b>. When the timer reaches zero, the test will be submitted automatically.</li>
+    <li>Each question carries <b>+4 marks</b> for a correct answer and <b>−1 mark</b> for an incorrect answer. Unattempted questions carry <b>0 marks</b>.</li>
+    <li>The Question Palette on the right shows the status of each question using colour codes:
+      <div class="legend" style="margin-top:10px;">
+        <div class="li"><span class="sw notvisited"></span> Not Visited</div>
+        <div class="li"><span class="sw notanswered"></span> Not Answered</div>
+        <div class="li"><span class="sw answered"></span> Answered</div>
+        <div class="li"><span class="sw marked"></span> Marked for Review</div>
+        <div class="li"><span class="sw markedans"></span> Answered &amp; Marked</div>
+      </div>
+    </li>
+    <li>Click <b>Save &amp; Next</b> to save your response and move on. Click <b>Mark for Review &amp; Next</b> to flag a question and revisit later. Click <b>Clear Response</b> to deselect your chosen option.</li>
+    <li>You may navigate to any question directly by clicking its number in the Question Palette.</li>
+  </ul>
+  <button class="beginBtn" id="beginBtn">I have read the instructions — Start Test</button>
+</div>
+
+<div class="examBody hidden" id="examBody">
+  <div class="questionPanel">
+    <div class="qpHeader">
+      <span>Question No. <span id="qNumLabel">1</span> of 25</span>
+      <span class="qType">MCQ</span>
+    </div>
+    <div class="qpContent">
+      <div class="qCategory" id="qCategory"></div>
+      <div class="qText" id="qText"></div>
+      <div class="qOptions" id="qOptions"></div>
+    </div>
+    <div class="qpFooter">
+      <button id="markReviewBtn">Mark for Review &amp; Next</button>
+      <button id="clearBtn">Clear Response</button>
+      <div class="navRight">
+        <button id="prevBtn">← Previous</button>
+        <button id="saveNextBtn">Save &amp; Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="palettePanel">
+    <div class="candidateBox">
+      <div class="avatar">AM</div>
+      <div>
+        <div class="cname">Candidate</div>
+        <div class="cid">Roll No. — MOCK-2026</div>
+      </div>
+    </div>
+    <div class="legend">
+      <div class="li"><span class="sw answered"></span> Answered</div>
+      <div class="li"><span class="sw notanswered"></span> Not Answered</div>
+      <div class="li"><span class="sw notvisited"></span> Not Visited</div>
+      <div class="li"><span class="sw marked"></span> Marked</div>
+      <div class="li"><span class="sw markedans"></span> Marked &amp; Ans.</div>
+    </div>
+    <div class="paletteLabel">Question Palette</div>
+    <div class="paletteGrid" id="paletteGrid"></div>
+    <button id="submitTestBtn">Submit Test</button>
+  </div>
+</div>
+
+<div class="resultsScreen hidden" id="resultsScreen"></div>
+
+<div class="modalOverlay hidden" id="submitModal">
+  <div class="modalBox">
+    <h3>Submit Test?</h3>
+    <p style="font-size:13.5px;color:var(--text-soft);">Please review your summary before final submission. This action cannot be undone.</p>
+    <div class="modalStats" id="modalStats"></div>
+    <div class="modalBtns">
+      <button id="cancelSubmit">Cancel</button>
+      <button id="confirmSubmit">Yes, Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+{cat:"Number System (Remainders)", q:"What is the remainder when $7^{84}$ is divided by $24$?",
+ options:["$0$","$1$","$7$","$23$"], correct:1,
+ exp:"Observe the powers of 7: $7^1$ leaves remainder $7$ when divided by $24$, and $7^2 = 49 = (24\\times 2)+1$ leaves remainder $1$. Since any even power of 7 can be written as $(7^2)^{42}$, the remainder is $1^{42} = 1$."},
+
+{cat:"Data Interpretation / Averages", q:"The weights of three friends are $45$ kg, $52$ kg, and $59$ kg. What is their average weight?",
+ options:["$50$ kg","$52$ kg","$54$ kg","$59$ kg"], correct:1,
+ exp:"Since $45, 52, 59$ form an arithmetic progression with common difference $7$, the middle value is automatically the average: $52$ kg. Alternatively, $\\dfrac{45+52+59}{3} = \\dfrac{156}{3} = 52$ kg."},
+
+{cat:"Time, Speed, and Distance", q:"A man walks from his house to his office at $4$ km/h and arrives $10$ minutes late. If he walks at $6$ km/h, he arrives $10$ minutes early. What is the distance between his house and his office?",
+ options:["$3$ km","$4$ km","$5$ km","$6$ km"], correct:1,
+ exp:"The time gap between $10$ min late and $10$ min early is $20$ minutes $= \\frac{1}{3}$ hour. Using $D = \\dfrac{S_1 S_2 \\, \\Delta T}{|S_1-S_2|}$, $D = \\dfrac{4\\times 6\\times \\frac13}{|4-6|} = \\dfrac{8}{2} = 4$ km."},
+
+{cat:"Logical Reasoning (Number Series)", q:"What is the next number in this sequence? $2, 6, 12, 20, 30, \\_\\_\\_$",
+ options:["$36$","$40$","$42$","$48$"], correct:2,
+ exp:"The differences between successive terms increase by $2$ each time ($+4,+6,+8,+10$). The next difference is $+12$, so $30+12=42$. Equivalently the sequence follows $n(n+1)$: $1\\times2,2\\times3,3\\times4,4\\times5,5\\times6$, and next $6\\times7=42$."},
+
+{cat:"Probability", q:"Two unbiased dice are rolled simultaneously. What is the probability that the sum of the two numbers shown is exactly $8$?",
+ options:["$\\dfrac{4}{36}$","$\\dfrac{5}{36}$","$\\dfrac{6}{36}$","$\\dfrac{1}{6}$"], correct:1,
+ exp:"Total outcomes $=6\\times6=36$. Favorable pairs for sum $8$: $(2,6),(3,5),(4,4),(5,3),(6,2)\\to5$ outcomes. Probability $=\\dfrac{5}{36}$."},
+
+{cat:"Logical Reasoning (Seating Arrangement)", q:"Six people P, Q, R, S, T, U sit around a circular table facing the center. P is opposite Q. R is to the immediate left of P. T is exactly opposite R. S is exactly between Q and R. Who sits to the immediate right of P?",
+ options:["S","T","U","Q"], correct:2,
+ exp:"Place P at 6 o'clock and Q opposite at 12 o'clock. R is immediate left of P (facing inside) → 5 o'clock. T is opposite R → 11 o'clock. S is between Q and R → 1 o'clock. The only unfilled seat is 7 o'clock (immediate right of P) — occupied by U."},
+
+{cat:"Percentages / Mixture Problems", q:"A $40$-liter mixture of milk and water contains $10\\%$ water. How many liters of water must be added to make the water content $20\\%$ of the new mixture?",
+ options:["$4$ liters","$5$ liters","$8$ liters","$10$ liters"], correct:1,
+ exp:"Milk stays constant: $90\\%$ of $40 = 36$ L. In the final mixture milk is $80\\%$. So $0.80\\times \\text{New Total} = 36 \\Rightarrow \\text{New Total} = 45$ L. Water added $=45-40=5$ liters."},
+
+{cat:"Profit and Loss", q:"An item is sold for $\\$120$, resulting in a $20\\%$ loss. What was the original cost price of the item?",
+ options:["$\\$130$","$\\$140$","$\\$150$","$\\$160$"], correct:2,
+ exp:"A $20\\%$ loss means Selling Price ($\\$120$) is $80\\%$ of Cost Price. So $0.80\\times CP = 120 \\Rightarrow CP = \\dfrac{120}{0.80}=\\$150$."},
+
+{cat:"Time and Work", q:"A can complete a job in $12$ days, B in $18$ days. They start together, but A leaves $2$ days before completion. How many total days did it take?",
+ options:["$7.5$ days","$8$ days","$8.4$ days","$9$ days"], correct:2,
+ exp:"Total work $=\\text{LCM}(12,18)=36$ units. A's rate $=3$/day, B's rate $=2$/day. Had A not left early, A would've done $2$ extra days $\\times 3 = 6$ units. Simulated total $=36+6=42$ units. Time $=\\dfrac{42}{3+2}=8.4$ days."},
+
+{cat:"Logical Reasoning (Coding-Decoding)", q:'If CANDLE is coded as DCOFMF using an alternating $+1,+2$ rule, how is FLAME coded?',
+ options:["GNBOF","GMBOE","FNBOF","GNBNF"], correct:0,
+ exp:"Rule: $+1,+2,+1,+2,+1$ applied letter by letter. F(+1)→G, L(+2)→N, A(+1)→B, M(+2)→O, E(+1)→F. Result: GNBOF."},
+
+{cat:"Simplification & Fractions", q:"Which of the following fractions is the largest? $\\dfrac34,\\ \\dfrac56,\\ \\dfrac79,\\ \\dfrac{11}{12}$",
+ options:["$\\dfrac34$","$\\dfrac56$","$\\dfrac79$","$\\dfrac{11}{12}$"], correct:3,
+ exp:"For fractions with the same numerator–denominator gap ($3/4, 5/6, 11/12$ all have gap $1$), the fraction with larger numbers is largest. Cross-multiplying $11/12$ vs $7/9$: $11\\times9=99$ vs $12\\times7=84$. Since $99>84$, $\\dfrac{11}{12}$ is the largest."},
+
+{cat:"Percentages", q:"If a number is increased by $20\\%$ and then decreased by $20\\%$, what is the net percentage change?",
+ options:["No change","$2\\%$ decrease","$4\\%$ decrease","$4\\%$ increase"], correct:2,
+ exp:"When a value is increased then decreased by the same $x\\%$, the net change is always a decrease of $\\left(\\dfrac{x}{10}\\right)^2\\%$. Here $\\left(\\dfrac{20}{10}\\right)^2=2^2=4\\%$ decrease."},
+
+{cat:"Ratios", q:"If $A:B = 2:3$ and $B:C = 4:5$, what is the combined ratio $A:B:C$?",
+ options:["$2:3:5$","$6:9:15$","$8:12:15$","$8:9:15$"], correct:2,
+ exp:"Make B common: $A:B=2:3\\to8:12$ (×4). $B:C=4:5\\to12:15$ (×3). Combined ratio: $8:12:15$."},
+
+{cat:"Partnership", q:"Tom invests $\\$5{,}000$ for $8$ months, Jerry invests $\\$4{,}000$ for $10$ months. If total profit at year end is $\\$2{,}400$, what is Jerry's share?",
+ options:["$\\$800$","$\\$1{,}000$","$\\$1{,}200$","$\\$1{,}600$"], correct:2,
+ exp:"Profit ratio uses Investment×Time. Tom: $5000\\times8=40{,}000$. Jerry: $4000\\times10=40{,}000$. Ratio is $1:1$, so Jerry gets half: $\\$2{,}400/2=\\$1{,}200$."},
+
+{cat:"HCF and LCM", q:"Two numbers are in the ratio $3:4$. If their HCF is $5$, what is their LCM?",
+ options:["$20$","$40$","$60$","$80$"], correct:2,
+ exp:"The numbers are $3\\times5=15$ and $4\\times5=20$. LCM of $15$ and $20$ is $60$. Shortcut: $\\text{LCM} = 3\\times4\\times5 = 60$."},
+
+{cat:"Geometry / Mensuration", q:"If the radius of a circle is increased by $50\\%$, by what percentage will its area increase?",
+ options:["$50\\%$","$75\\%$","$100\\%$","$125\\%$"], correct:3,
+ exp:"Area $\\propto r^2$. If radius scales by $1.5$, area scales by $1.5^2=2.25$. That's a $2.25-1=1.25$, i.e. $125\\%$ increase."},
+
+{cat:"Mixtures & Alligations", q:"A jar has liquids A and B in ratio $4:1$. When $10$ liters of mixture is removed and replaced with $10$ liters of pure B, the ratio becomes $2:3$. What was the initial total volume?",
+ options:["$15$ liters","$20$ liters","$25$ liters","$30$ liters"], correct:1,
+ exp:"Initially A is $4/5$ ($80\\%$). After replacement A drops to $2/5$ ($40\\%$) — exactly halved. When concentration halves this way, volume removed equals volume remaining, so total $=10$ L removed $+10$ L remaining $=20$ liters."},
+
+{cat:"Time, Speed, and Distance (Relative Speed)", q:"A thief steals a car at $1{:}00$ PM driving at $40$ km/h. Theft is discovered at $2{:}00$ PM; the owner chases at $50$ km/h. At what time does the owner catch the thief?",
+ options:["$6{:}00$ PM","$6{:}30$ PM","$7{:}00$ PM","$7{:}30$ PM"], correct:2,
+ exp:"By 2 PM the thief has a 1-hour head start covering $40$ km. Relative speed $=50-40=10$ km/h. Time to catch up $=\\dfrac{40}{10}=5$ hours. $2{:}00$ PM $+5$ hours $=7{:}00$ PM."},
+
+{cat:"Permutations and Combinations", q:'In how many ways can the letters of "LEADING" be arranged so the vowels always come together?',
+ options:["$120$","$360$","$720$","$5040$"], correct:2,
+ exp:"Bundle vowels (E, A, I) as one unit. That leaves $4$ consonants (L, D, N, G) $+1$ bundle $=5$ units, arranged in $5! = 120$ ways. The $3$ vowels arrange within the bundle in $3!=6$ ways. Total $=120\\times6=720$."},
+
+{cat:"Algebra / Quadratic Equations", q:"If the roots of $x^2 - px + q = 0$ differ by exactly $1$, which relationship between $p$ and $q$ holds?",
+ options:["$p^2 = 4q + 1$","$p^2 = 4q - 1$","$q^2 = 4p + 1$","$p^2 = q + 4$"], correct:0,
+ exp:"Sum of roots $=p$, product $=q$, and $|\\alpha-\\beta|=1$. Using $(\\alpha-\\beta)^2=(\\alpha+\\beta)^2-4\\alpha\\beta$: $1^2 = p^2-4q \\Rightarrow p^2=4q+1$."},
+
+{cat:"Time and Work (Efficiency)", q:"$3$ men and $4$ women finish a job together in $16$ days. $4$ men and $6$ women finish the same job in $12$ days. How many days will $2$ men and $3$ women take?",
+ options:["$20$ days","$22$ days","$24$ days","$28$ days"], correct:2,
+ exp:"Equating man-days: $(3M+4W)\\times16=(4M+6W)\\times12$, which simplifies to show the group $(2M+3W)$ has exactly half the work rate of $(4M+6W)$. Half the rate takes twice as long: $12\\times2=24$ days."},
+
+{cat:"Geometry (Circles & Chords)", q:"Two parallel chords of a circle of radius $15$ cm lie on opposite sides of the center. One chord is $18$ cm, the other $24$ cm. What is the distance between them?",
+ options:["$15$ cm","$18$ cm","$21$ cm","$24$ cm"], correct:2,
+ exp:"Perpendiculars from center bisect chords into $9$ cm and $12$ cm halves. Distance of $24$cm chord from center $=\\sqrt{15^2-12^2}=9$ cm. Distance of $18$cm chord $=\\sqrt{15^2-9^2}=12$ cm. On opposite sides: total $=9+12=21$ cm."},
+
+{cat:"Averages", q:"The average weight of a group is $60$ kg. When $8$ students averaging $65$ kg join, the group's average rises by $1$ kg. How many students were originally in the group?",
+ options:["$24$","$28$","$32$","$36$"], correct:2,
+ exp:"Each new student adds $65-60=5$ kg of surplus; total surplus $=8\\times5=40$ kg. This surplus raises the whole group's average by $1$ kg, so the final count $=40/1=40$ students. Original count $=40-8=32$."},
+
+{cat:"Number System (Factors)", q:"Find the total number of perfect square factors of $3600$.",
+ options:["$8$","$9$","$12$","$16$"], correct:2,
+ exp:"$3600=2^4\\times3^2\\times5^2$. For a perfect square factor, exponents must be even: $2$ has options $\\{0,2,4\\}$ (3), $3$ has $\\{0,2\\}$ (2), $5$ has $\\{0,2\\}$ (2). Total $=3\\times2\\times2=12$."},
+
+{cat:"True Discount & Present Worth", q:"The true discount on a bill due $9$ months hence at $12\\%$ p.a. is $\\$540$. What is the Face Value of the bill?",
+ options:["$\\$6{,}000$","$\\$6{,}300$","$\\$6{,}540$","$\\$6{,}600$"], correct:2,
+ exp:"Rate for $9$ months $=12\\%\\times\\frac{9}{12}=9\\%$. True Discount is interest on Present Worth: $9\\%$ of $PW=540 \\Rightarrow PW=\\$6{,}000$. Face Value $=PW+TD=6{,}000+540=\\$6{,}540$."}
+];
+
+const TOTAL_TIME = 90*60; // 90 minutes in seconds
+const state = {
+  answers: new Array(QUESTIONS.length).fill(null),
+  visited: new Array(QUESTIONS.length).fill(false),
+  marked: new Array(QUESTIONS.length).fill(false),
+  current: 0,
+  submitted: false,
+  timeLeft: TOTAL_TIME,
+  timerHandle: null
+};
+
+function renderMath(el){
+  renderMathInElement(el, {
+    delimiters: [
+      {left:"$$", right:"$$", display:true},
+      {left:"$", right:"$", display:false}
+    ],
+    throwOnError:false
+  });
+}
+
+function statusOf(idx){
+  const answered = state.answers[idx] !== null;
+  const marked = state.marked[idx];
+  if(marked && answered) return 'markedans';
+  if(marked) return 'marked';
+  if(answered) return 'answered';
+  if(state.visited[idx]) return 'notanswered';
+  return 'notvisited';
+}
+
+function buildPalette(){
+  const grid = document.getElementById('paletteGrid');
+  grid.innerHTML = '';
+  QUESTIONS.forEach((_, idx)=>{
+    const btn = document.createElement('button');
+    btn.className = 'paletteBtn ' + statusOf(idx);
+    if(idx === state.current) btn.classList.add('current');
+    btn.textContent = idx+1;
+    btn.addEventListener('click', ()=> goTo(idx));
+    grid.appendChild(btn);
+  });
+}
+
+function goTo(idx){
+  state.current = idx;
+  state.visited[idx] = true;
+  renderQuestion();
+  buildPalette();
+}
+
+function renderQuestion(){
+  const idx = state.current;
+  const item = QUESTIONS[idx];
+  document.getElementById('qNumLabel').textContent = idx+1;
+  document.getElementById('qCategory').textContent = item.cat;
+
+  const qText = document.getElementById('qText');
+  qText.textContent = item.q;
+  renderMath(qText);
+
+  const optsWrap = document.getElementById('qOptions');
+  optsWrap.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  item.options.forEach((optText, oIdx)=>{
+    const row = document.createElement('label');
+    row.className = 'optionRow' + (state.answers[idx]===oIdx ? ' selected' : '');
+    row.innerHTML = `<input type="radio" name="opt" ${state.answers[idx]===oIdx?'checked':''}>
+      <span><span class="optLabel">${letters[oIdx]}.</span><span class="optText">${optText}</span></span>`;
+    row.addEventListener('click', ()=>{
+      state.answers[idx] = oIdx;
+      renderQuestion();
+      buildPalette();
+    });
+    optsWrap.appendChild(row);
+    renderMath(row);
+  });
+
+  document.getElementById('prevBtn').disabled = (idx===0);
+}
+
+function clearResponse(){
+  state.answers[state.current] = null;
+  renderQuestion();
+  buildPalette();
+}
+
+function markForReview(){
+  const idx = state.current;
+  state.marked[idx] = true;
+  state.visited[idx] = true;
+  advance();
+}
+
+function saveNext(){
+  const idx = state.current;
+  state.visited[idx] = true;
+  advance();
+}
+
+function advance(){
+  if(state.current < QUESTIONS.length-1){
+    goTo(state.current+1);
+  } else {
+    buildPalette();
+  }
+}
+
+/* ---------------- TIMER ---------------- */
+function formatTime(sec){
+  const h = String(Math.floor(sec/3600)).padStart(2,'0');
+  const m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
+  const s = String(sec%60).padStart(2,'0');
+  return `${h}:${m}:${s}`;
+}
+function startTimer(){
+  document.getElementById('timerDisplay').textContent = formatTime(state.timeLeft);
+  state.timerHandle = setInterval(()=>{
+    state.timeLeft--;
+    document.getElementById('timerDisplay').textContent = formatTime(state.timeLeft);
+    if(state.timeLeft <= 300){
+      document.getElementById('timerBox').classList.add('warn');
+    }
+    if(state.timeLeft <= 0){
+      clearInterval(state.timerHandle);
+      doSubmit(true);
+    }
+  }, 1000);
+}
+
+/* ---------------- SUBMIT ---------------- */
+function openSubmitModal(){
+  const answered = state.answers.filter(a=>a!==null).length;
+  const notAnswered = QUESTIONS.length - answered;
+  const markedCount = state.marked.filter(Boolean).length;
+  const notVisited = state.visited.filter(v=>!v).length;
+  document.getElementById('modalStats').innerHTML = `
+    <div class="m-item"><span>Answered</span><b>${answered}</b></div>
+    <div class="m-item"><span>Not Answered</span><b>${notAnswered}</b></div>
+    <div class="m-item"><span>Marked for Review</span><b>${markedCount}</b></div>
+    <div class="m-item"><span>Not Visited</span><b>${notVisited}</b></div>
+  `;
+  document.getElementById('submitModal').classList.remove('hidden');
+}
+
+function doSubmit(auto){
+  state.submitted = true;
+  if(state.timerHandle) clearInterval(state.timerHandle);
+  document.getElementById('submitModal').classList.add('hidden');
+  document.getElementById('examBody').classList.add('hidden');
+
+  let correct=0, wrong=0, skipped=0, score=0;
+  const letters = ['A','B','C','D'];
+  let reviewHtml = '';
+
+  QUESTIONS.forEach((item, idx)=>{
+    const chosen = state.answers[idx];
+    let verdict, tag;
+    if(chosen===null){
+      skipped++; verdict='skip'; tag='SKIPPED · 0';
+    } else if(chosen===item.correct){
+      correct++; score+=4; verdict='correct'; tag='CORRECT · +4';
+    } else {
+      wrong++; score-=1; verdict='wrong'; tag='INCORRECT · −1';
+    }
+
+    let optsHtml = '';
+    item.options.forEach((optText, oIdx)=>{
+      let cls = '';
+      if(oIdx===item.correct) cls='correctopt';
+      else if(oIdx===chosen) cls='wrongopt';
+      optsHtml += `<div class="reviewOpt ${cls}">${letters[oIdx]}. ${optText}</div>`;
+    });
+
+    reviewHtml += `
+      <div class="reviewCard">
+        <div class="reviewHead">
+          <span class="rq">Q${idx+1}. ${item.cat}</span>
+          <span class="verdictTag ${verdict}">${tag}</span>
+        </div>
+        <div class="reviewQText">${item.q}</div>
+        ${optsHtml}
+        <div class="reviewExp"><b>Explanation:</b> ${item.exp}</div>
+      </div>`;
+  });
+
+  const resultsScreen = document.getElementById('resultsScreen');
+  resultsScreen.innerHTML = `
+    <div class="scoreSummary">
+      <div style="font-size:12px;letter-spacing:0.1em;color:#FFD166;text-transform:uppercase;">${auto ? 'Time Up — Auto Submitted' : 'Test Complete'}</div>
+      <div class="bigscore">${score}</div>
+      <div class="sub">out of a possible 100 marks</div>
+      <div class="statRow">
+        <div class="stat correct"><span class="num">${correct}</span>Correct (+4 ea)</div>
+        <div class="stat wrong"><span class="num">${wrong}</span>Wrong (−1 ea)</div>
+        <div class="stat skip"><span class="num">${skipped}</span>Skipped</div>
+      </div>
+      <button class="retakeBtn2" id="retakeBtn2">Retake Test</button>
+    </div>
+    ${reviewHtml}
+  `;
+  resultsScreen.classList.remove('hidden');
+  renderMath(resultsScreen);
+  document.getElementById('retakeBtn2').addEventListener('click', resetTest);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function resetTest(){
+  state.answers = new Array(QUESTIONS.length).fill(null);
+  state.visited = new Array(QUESTIONS.length).fill(false);
+  state.marked = new Array(QUESTIONS.length).fill(false);
+  state.current = 0;
+  state.submitted = false;
+  state.timeLeft = TOTAL_TIME;
+  document.getElementById('timerBox').classList.remove('warn');
+  document.getElementById('resultsScreen').classList.add('hidden');
+  document.getElementById('instructionsScreen').classList.remove('hidden');
+  document.getElementById('examBody').classList.add('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ---------------- INIT ---------------- */
+document.getElementById('beginBtn').addEventListener('click', ()=>{
+  document.getElementById('instructionsScreen').classList.add('hidden');
+  document.getElementById('examBody').classList.remove('hidden');
+  state.visited[0] = true;
+  renderQuestion();
+  buildPalette();
+  startTimer();
+});
+document.getElementById('markReviewBtn').addEventListener('click', markForReview);
+document.getElementById('clearBtn').addEventListener('click', clearResponse);
+document.getElementById('prevBtn').addEventListener('click', ()=> goTo(state.current-1));
+document.getElementById('saveNextBtn').addEventListener('click', saveNext);
+document.getElementById('submitTestBtn').addEventListener('click', openSubmitModal);
+document.getElementById('cancelSubmit').addEventListener('click', ()=> document.getElementById('submitModal').classList.add('hidden'));
+document.getElementById('confirmSubmit').addEventListener('click', ()=> doSubmit(false));
+</script>
+
+</body>
+</html>
